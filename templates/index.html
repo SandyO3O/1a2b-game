@@ -1,23 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>1A2B 遊戲大廳</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <title>1A2B 遊戲大廳</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 1A2B 數字猜謎遊戲</h1>
-        <form method="post" action="/new_game">
-            <label>選擇題目長度（4~8 位）：</label>
-            <select name="length">
-                {% for i in range(4, 9) %}
-                    <option value="{{ i }}">{{ i }} 位數</option>
-                {% endfor %}
-            </select>
-            <br><br>
-            <button type="submit" class="btn">建立新遊戲</button>
-        </form>
-    </div>
+  <div class="container">
+    <h1>🎮 1A2B 數字猜謎遊戲</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('create_game') }}" method="post" class="form-block">
+      <h2>建立新遊戲</h2>
+      <input type="text" name="nickname" placeholder="你的暱稱" required>
+      <label for="difficulty">選擇難度：</label>
+      <select name="difficulty">
+        {% for i in range(4, 9) %}
+          <option value="{{ i }}">{{ i }} 位數</option>
+        {% endfor %}
+      </select>
+      <button type="submit">建立遊戲</button>
+    </form>
+
+    <form action="{{ url_for('join_game_by_code') }}" method="post" class="form-block">
+      <h2>加入現有遊戲</h2>
+      <input type="text" name="nickname" placeholder="你的暱稱" required>
+      <input type="text" name="game_code" placeholder="輸入遊戲代碼" required>
+      <button type="submit">加入遊戲</button>
+    </form>
+  </div>
 </body>
 </html>

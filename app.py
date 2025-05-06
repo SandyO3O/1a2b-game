@@ -4,6 +4,7 @@ import qrcode
 import os
 
 app = Flask(__name__)
+app.secret_key = "your-secret-key"  # 用於 flash 訊息
 
 games = {}
 
@@ -80,6 +81,16 @@ def game(game_id):
 def qr_page(game_id):
     filepath = f'/static/{game_id}.png'
     return render_template('qr.html', game_id=game_id, filepath=filepath)
+
+@app.route("/join_game_by_code", methods=["POST"])
+def join_game_by_code():
+    game_code = request.form.get("game_code", "").strip()
+
+    if game_code in games:
+        return redirect(url_for("game", game_id=game_code))
+    else:
+        flash("找不到該遊戲代碼，請確認後再試。")
+        return redirect(url_for("index"))
 
 if __name__ == "__main__":
     import os
