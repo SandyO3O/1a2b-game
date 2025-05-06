@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import random
 import qrcode
 import os
-
+import io
+import base64
 app = Flask(__name__)
 
 games = {}
@@ -80,4 +81,14 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))  # Render 會自動指定 PORT
     app.run(host="0.0.0.0", port=port)        # 一定要綁定 0.0.0.0 才能對外開放
+
+@app.route("/qr")
+def qr():
+    game_url = request.url_root.strip('/')  # eg. https://yourapp.onrender.com
+    # 產生 QR code 圖片並轉 base64
+    img = qrcode.make(game_url)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    qr_code_url = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+    return render_template("qr.html", game_url=game_url, qr_code_url=qr_code_url)
 
