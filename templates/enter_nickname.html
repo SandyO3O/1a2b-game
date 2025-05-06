@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>輸入暱稱</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 輸入暱稱加入遊戲</h1>
+        <form method="post">
+            <input type="text" name="nickname" placeholder="你的暱稱" required>
+            <button type="submit">進入遊戲</button>
+        </form>
+        <p><a href="/">回首頁</a></p>
+    </div>
+</body>
+</html>

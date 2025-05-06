@@ -39,7 +39,7 @@ def new_game():
     }
 
     # 產生 QR code
-    join_url = request.url_root + 'game/' + game_id
+    join_url = request.url_root + 'enter_nickname/' + game_id
     qr = qrcode.make(join_url)
     filename = f'{game_id}.png'
     filepath = os.path.join('static', filename)
@@ -96,6 +96,14 @@ def join_game_by_code():
         flash("找不到該遊戲代碼，請確認後再試。")
         return redirect(url_for("index"))
 
+@app.route('/enter_nickname/<game_id>', methods=['GET', 'POST'])
+def enter_nickname(game_id):
+    if request.method == 'POST':
+        nickname = request.form.get('nickname', '匿名').strip() or '匿名'
+        session['nickname'] = nickname
+        return redirect(url_for('game', game_id=game_id))
+    return render_template('enter_nickname.html', game_id=game_id)
+    
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))  # Render 會自動指定 PORT
