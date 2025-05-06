@@ -52,24 +52,20 @@
         {% endif %}
 
         <h2>📜 歷史紀錄</h2>
-        {% if guesses %}
-		    <table id="history-table">
-                    <tr>
-                        <th>暱稱</th>
-                        <th>猜測</th>
-                        <th>結果</th>
-                    </tr>
-                    {% for g in guesses %}
-                    <tr>
-                        <td>{{ g.name }}</td>
-                        <td>{{ g.guess }}</td>
-                        <td>{{ g.result }}</td>
-                    </tr>
-                    {% endfor %}
-            </table>
-        {% else %}
-            <p>尚無紀錄</p>
-        {% endif %}
+		<table id="history-table">
+                <tr>
+                    <th>暱稱</th>
+                    <th>猜測</th>
+                    <th>結果</th>
+                </tr>
+                {% for g in guesses %}
+                <tr>
+                    <td>{{ g.name }}</td>
+                    <td>{{ g.guess }}</td>
+                    <td>{{ g.result }}</td>
+                </tr>
+                {% endfor %}
+        </table>
 
         <p><a href="/">回首頁</a></p>
     </div>
