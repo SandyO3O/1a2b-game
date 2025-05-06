@@ -59,3 +59,14 @@ th, td {
     font-weight: bold;
     margin: 15px 0;
 }
+
+.flashes {
+  list-style: none;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #ffe0e0;
+  border: 1px solid #ffaaaa;
+  color: #d8000c;
+  font-weight: bold;
+  border-radius: 8px;
+}
