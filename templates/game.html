@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>1A2B 遊戲</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 猜 {{ length }} 位數字（可重複）</h1>
+        <p><strong>遊戲代碼：</strong> {{ game_id }}</p>
+
+        <form method="post">
+            <label>暱稱：</label>
+            <input type="text" name="name" placeholder="輸入名字">
+            <label>猜測：</label>
+            <input type="text" name="guess" maxlength="{{ length }}" placeholder="輸入 {{ length }} 位數">
+            <button type="submit" class="btn">送出</button>
+        </form>
+
+        {% if message %}
+            <p class="result">結果：{{ message }}</p>
+        {% endif %}
+
+        {% if message and '恭喜' in message %}
+            <form method="post" action="/new_game">
+                <button type="submit" class="btn success">再玩一局</button>
+            </form>
+        {% endif %}
+
+        <h2>📜 歷史紀錄</h2>
+        {% if guesses %}
+            <table>
+                <tr>
+                    <th>暱稱</th>
+                    <th>猜測</th>
+                    <th>結果</th>
+                </tr>
+                {% for g in guesses %}
+                    <tr>
+                        <td>{{ g.name }}</td>
+                        <td>{{ g.guess }}</td>
+                        <td>{{ g.result }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>尚無紀錄</p>
+        {% endif %}
+
+        <p><a href="/">回首頁</a></p>
+    </div>
+</body>
+</html>

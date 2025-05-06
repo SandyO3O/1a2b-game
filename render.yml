@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: 1a2b-game
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
