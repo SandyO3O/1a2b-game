@@ -81,5 +81,7 @@ def qr_page(game_id):
     filepath = f'/static/{game_id}.png'
     return render_template('qr.html', game_id=game_id, filepath=filepath)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))  # Render 會自動指定 PORT
+    app.run(host="0.0.0.0", port=port)        # 一定要綁定 0.0.0.0 才能對外開放
