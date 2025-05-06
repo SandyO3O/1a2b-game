@@ -5,6 +5,31 @@
     <title>1A2B 遊戲</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+<script>
+    function fetchHistory() {
+        fetch(`/history/{{ game_id }}`)
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById("history-table");
+                // 先清除舊資料（除了表頭）
+                table.innerHTML = `
+                    <tr>
+                        <th>暱稱</th>
+                        <th>猜測</th>
+                        <th>結果</th>
+                    </tr>
+                `;
+                // 加入新資料
+                data.guesses.forEach(g => {
+                    const row = table.insertRow();
+                    row.innerHTML = `<td>${g.name}</td><td>${g.guess}</td><td>${g.result}</td>`;
+                });
+            });
+    }
+
+    // 每 2 秒更新一次
+    setInterval(fetchHistory, 2000);
+</script>
 <body>
     <div class="container">
         <h1>🎯 猜 {{ length }} 位數字（可重複）</h1>
@@ -28,19 +53,19 @@
 
         <h2>📜 歷史紀錄</h2>
         {% if guesses %}
-            <table>
-                <tr>
-                    <th>暱稱</th>
-                    <th>猜測</th>
-                    <th>結果</th>
-                </tr>
-                {% for g in guesses %}
+		    <table id="history-table">
+                    <tr>
+                        <th>暱稱</th>
+                        <th>猜測</th>
+                        <th>結果</th>
+                    </tr>
+                    {% for g in guesses %}
                     <tr>
                         <td>{{ g.name }}</td>
                         <td>{{ g.guess }}</td>
                         <td>{{ g.result }}</td>
                     </tr>
-                {% endfor %}
+                    {% endfor %}
             </table>
         {% else %}
             <p>尚無紀錄</p>

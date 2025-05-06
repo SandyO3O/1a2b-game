@@ -103,6 +103,16 @@ def enter_nickname(game_id):
         session['nickname'] = nickname
         return redirect(url_for('game', game_id=game_id))
     return render_template('enter_nickname.html', game_id=game_id)
+
+from flask import jsonify
+
+@app.route('/history/<game_id>')
+def history(game_id):
+    game = games.get(game_id)
+    if not game:
+        return jsonify({'error': '遊戲不存在'}), 404
+
+    return jsonify({'guesses': game['guesses']})
     
 if __name__ == "__main__":
     import os
