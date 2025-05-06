@@ -1,32 +1,19 @@
-<!-- templates/qr.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1A2B 遊戲 QR Code</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .qr-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            text-align: center;
-        }
-        img {
-            max-width: 300px;
-            width: 80%;
-            margin-top: 1rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>遊戲 QR Code</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="qr-container">
-        <h1>加入 1A2B 遊戲</h1>
-        <p>掃描下方 QR Code 開始遊戲：</p>
-        <img src="{{ qr_code_url }}" alt="QR Code">
-        <p><a href="{{ game_url }}">{{ game_url }}</a></p>
-    </div>
+  <div class="container">
+    <h1>掃描 QR Code 加入遊戲</h1>
+    <img src="{{ url_for('generate_qrcode', game_id=game_id) }}" alt="QR Code" width="250">
+    <p>或點擊下方連結加入：</p>
+    <a href="{{ game_url }}">{{ game_url }}</a>
+    <br><br>
+    <a href="/">回首頁</a>
+  </div>
 </body>
 </html>

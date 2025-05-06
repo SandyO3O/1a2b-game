@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <title>1A2B 遊戲大廳</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1A2B 遊戲大廳</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 1A2B 數字猜謎遊戲</h1>
-        <form method="post" action="/new_game">
-            <label>選擇題目長度（4~8 位）：</label>
-            <select name="length">
-                {% for i in range(4, 9) %}
-                    <option value="{{ i }}">{{ i }} 位數</option>
-                {% endfor %}
-            </select>
-            <br><br>
-            <button type="submit" class="btn">建立新遊戲</button>
-        </form>
-    </div>
+  <div class="container">
+    <h1>建立新遊戲</h1>
+    <form method="POST" action="/create">
+      <label for="length">選擇題目位數：</label>
+      <select name="length" id="length">
+        <option value="4">4 位數</option>
+        <option value="5">5 位數</option>
+        <option value="6" selected>6 位數</option>
+        <option value="7">7 位數</option>
+        <option value="8">8 位數</option>
+      </select>
+      <br><br>
+      <button type="submit">建立新遊戲</button>
+    </form>
+  </div>
 </body>
 </html>
