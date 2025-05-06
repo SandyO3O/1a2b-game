@@ -1,19 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>遊戲 QR Code</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>掃描 QR 加入遊戲</title>
 </head>
 <body>
-  <div class="container">
-    <h1>掃描 QR Code 加入遊戲</h1>
-    <img src="{{ url_for('generate_qrcode', game_id=game_id) }}" alt="QR Code" width="250">
-    <p>或點擊下方連結加入：</p>
-    <a href="{{ game_url }}">{{ game_url }}</a>
-    <br><br>
-    <a href="/">回首頁</a>
-  </div>
+    <h1>📱 掃描 QR code 加入遊戲</h1>
+    <p>遊戲代碼：{{ game_id }}</p>
+    <img src="{{ filepath }}" alt="QR Code">
+    <p><a href="/game/{{ game_id }}">👉 或直接點此進入遊戲</a></p>
 </body>
 </html>

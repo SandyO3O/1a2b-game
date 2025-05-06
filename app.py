@@ -1,62 +1,85 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
-import random, string, io, qrcode
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for
+import random
+import qrcode
+import os
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
 
 games = {}
 
 def generate_answer(length):
-    return ''.join(random.choices(string.digits, k=length))
+    return ''.join(random.choices('0123456789', k=length))
+
+def generate_game_id():
+    return ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=4))
+
+def check_guess(answer, guess):
+    A = sum(a == b for a, b in zip(answer, guess))
+    B = sum(min(answer.count(d), guess.count(d)) for d in set(guess)) - A
+    return f"{A}A{B}B"
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/create', methods=['POST'])
-def create_game():
+@app.route('/new_game', methods=['POST'])
+def new_game():
     length = int(request.form.get('length', 6))
-    game_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+    game_id = generate_game_id()
+    answer = generate_answer(length)
+
     games[game_id] = {
-        'answer': generate_answer(length),
-        'guesses': [],
-        'length': length
+        "answer": answer,
+        "length": length,
+        "guesses": []
     }
-    return redirect(url_for('show_qr', game_id=game_id))
 
-@app.route('/qr/<game_id>')
-def show_qr(game_id):
-    game_url = request.url_root.strip('/') + url_for('play_game', game_id=game_id)
-    return render_template('qr.html', game_url=game_url, game_id=game_id)
+    # 產生 QR code
+    join_url = request.url_root + 'game/' + game_id
+    qr = qrcode.make(join_url)
+    filename = f'{game_id}.png'
+    filepath = os.path.join('static', filename)
+    qr.save(filepath)
 
-@app.route('/qrcode/<game_id>')
-def generate_qrcode(game_id):
-    game_url = request.url_root.strip('/') + url_for('play_game', game_id=game_id)
-    img = qrcode.make(game_url)
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    buf.seek(0)
-    return send_file(buf, mimetype='image/png')
+    return redirect(url_for('qr_page', game_id=game_id))
 
 @app.route('/game/<game_id>', methods=['GET', 'POST'])
-def play_game(game_id):
+def game(game_id):
     game = games.get(game_id)
     if not game:
-        return "Game not found.", 404
+        return "❌ 無效的遊戲代碼", 404
 
-    result = None
+    answer = game["answer"]
+    length = game["length"]
+    guesses = game["guesses"]
+    message = ''
+    guess = ''
+    name = ''
+
     if request.method == 'POST':
         guess = request.form['guess']
-        answer = game['answer']
-        a = sum(g == a for g, a in zip(guess, answer))
-        b = sum(min(guess.count(d), answer.count(d)) for d in set(guess)) - a
-        result = f"{a}A{b}B"
-        game['guesses'].append((guess, result))
+        name = request.form.get('name', '匿名').strip() or '匿名'
 
-    return render_template('game.html', game_id=game_id, guesses=game['guesses'], result=result, length=game['length'])
+        if len(guess) != length or not guess.isdigit():
+            message = f"請輸入 {length} 位數字"
+        else:
+            result = check_guess(answer, guess)
+            message = result
+            guesses.append({
+                "name": name,
+                "guess": guess,
+                "result": result
+            })
+            if result == f"{length}A0B":
+                message += " 🎉 恭喜答對！"
+
+    return render_template('game.html', game_id=game_id, guess=guess, message=message,
+                           guesses=guesses, length=length)
+
+@app.route('/qr/<game_id>')
+def qr_page(game_id):
+    filepath = f'/static/{game_id}.png'
+    return render_template('qr.html', game_id=game_id, filepath=filepath)
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
