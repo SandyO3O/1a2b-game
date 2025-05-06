@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash  # 加入 flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import random
 import qrcode
 import os
@@ -25,7 +25,10 @@ def index():
 
 @app.route('/new_game', methods=['POST'])
 def new_game():
-    length = int(request.form.get('length', 6))
+    length = int(request.form.get('difficulty', 6))
+    nickname = request.form.get('nickname', '匿名').strip() or '匿名'
+    session['nickname'] = nickname  # 暱稱存入 session
+
     game_id = generate_game_id()
     answer = generate_answer(length)
 
@@ -55,11 +58,10 @@ def game(game_id):
     guesses = game["guesses"]
     message = ''
     guess = ''
-    name = ''
 
     if request.method == 'POST':
         guess = request.form['guess']
-        name = request.form.get('name', '匿名').strip() or '匿名'
+        name = session.get('nickname', '匿名')  # 取出暱稱
 
         if len(guess) != length or not guess.isdigit():
             message = f"請輸入 {length} 位數字"
@@ -85,6 +87,8 @@ def qr_page(game_id):
 @app.route("/join_game_by_code", methods=["POST"])
 def join_game_by_code():
     game_code = request.form.get("game_code", "").strip()
+    nickname = request.form.get("nickname", '匿名').strip() or '匿名'
+    session['nickname'] = nickname  # 儲存暱稱
 
     if game_code in games:
         return redirect(url_for("game", game_id=game_code))

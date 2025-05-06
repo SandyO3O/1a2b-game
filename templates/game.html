@@ -11,8 +11,6 @@
         <p><strong>遊戲代碼：</strong> {{ game_id }}</p>
 
         <form method="post">
-            <label>暱稱：</label>
-            <input type="text" name="name" placeholder="輸入名字">
             <label>猜測：</label>
             <input type="text" name="guess" maxlength="{{ length }}" placeholder="輸入 {{ length }} 位數">
             <button type="submit" class="btn">送出</button>
