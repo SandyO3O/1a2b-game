@@ -19,7 +19,7 @@
       {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('create_game') }}" method="post" class="form-block">
+    <form action="{{ url_for('new_game') }}" method="post" class="form-block">
       <h2>建立新遊戲</h2>
       <input type="text" name="nickname" placeholder="你的暱稱" required>
       <label for="difficulty">選擇難度：</label>
