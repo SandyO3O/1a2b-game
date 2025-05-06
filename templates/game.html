@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>1A2B 遊戲 - {{ length }} 位數</h1>
+    <h1>🎯 猜 {{ length }} 位數字（可重複）</h1>
     <form method="POST">
       <input type="text" name="guess" maxlength="{{ length }}" placeholder="輸入 {{ length }} 位數" required>
       <button type="submit">猜！</button>
@@ -18,7 +18,7 @@
       <p>結果：{{ result }}</p>
     {% endif %}
 
-    <h2>歷史紀錄</h2>
+    <h2>📜 歷史紀錄</h2>
     <ul>
       {% for guess, result in guesses %}
         <li>{{ guess }} → {{ result }}</li>
