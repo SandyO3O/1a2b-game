@@ -29,15 +29,30 @@ def new_game():
     nickname = request.form.get('nickname', '匿名').strip() or '匿名'
     session['nickname'] = nickname  # 暱稱存入 session
 
-    game_id = generate_game_id()
+    game_id = request.form.get('game_id')  # 如果是「再玩一局」，沿用原 game_id
+    if not game_id:
+        game_id = generate_game_id()
+
     answer = generate_answer(length)
 
     games[game_id] = {
         "answer": answer,
         "length": length,
         "guesses": [],
-        "owner": nickname
+        "host": nickname,      # ⭐ 紀錄房主
+        "wins": {},            # ⭐ 答對次數統計
+        "round": 1             # ⭐ 初始回合數
     }
+
+    # 產生 QR code
+    join_url = request.url_root + 'enter_nickname/' + game_id
+    qr = qrcode.make(join_url)
+    filename = f'{game_id}.png'
+    filepath = os.path.join('static', filename)
+    qr.save(filepath)
+
+    return redirect(url_for('qr_page', game_id=game_id))
+
 
     # 產生 QR code
     join_url = request.url_root + 'enter_nickname/' + game_id
@@ -59,34 +74,37 @@ def game(game_id):
     guesses = game["guesses"]
     message = ''
     guess = ''
+    nickname = session.get('nickname', '匿名')
 
     if request.method == 'POST':
-        if 'new_round' in request.form:
-            if session.get('nickname') == game.get('owner'):
-                new_length = int(request.form.get('difficulty', game["length"]))
-                game["answer"] = generate_answer(new_length)
-                game["length"] = new_length
-                game["guesses"] = []
-                return redirect(url_for("game", game_id=game_id))
+        guess = request.form['guess']
+
+        if len(guess) != length or not guess.isdigit():
+            message = f"請輸入 {length} 位數字"
         else:
-            guess = request.form['guess']
-            name = session.get('nickname', '匿名')  # 取出暱稱
+            result = check_guess(answer, guess)
+            message = result
+            guesses.append({
+                "name": nickname,
+                "guess": guess,
+                "result": result
+            })
 
-            if len(guess) != length or not guess.isdigit():
-                message = f"請輸入 {length} 位數字"
-            else:
-                result = check_guess(answer, guess)
-                message = result
-                guesses.append({
-                    "name": name,
-                    "guess": guess,
-                    "result": result
-                })
-                if result == f"{length}A0B":
-                    message += " 🎉 恭喜答對！"
+            if result == f"{length}A0B":
+                message += " 🎉 恭喜答對！"
+                # 更新答對次數
+                game["wins"][nickname] = game["wins"].get(nickname, 0) + 1
 
-    return render_template('game.html', game_id=game_id, guess=guess, message=message,
-                           guesses=guesses, length=game['length'])
+    return render_template('game.html',
+        game_id=game_id,
+        guess=guess,
+        message=message,
+        guesses=guesses,
+        length=length,
+        host=game.get("host"),
+        wins=game.get("wins", {}),
+        round=game.get("round", 1)
+    )
 
 @app.route('/qr/<game_id>')
 def qr_page(game_id):

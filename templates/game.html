@@ -34,6 +34,16 @@
     <div class="container">
         <h1>🎯 猜 {{ length }} 位數字（可重複）</h1>
         <p><strong>遊戲代碼：</strong> {{ game_id }}</p>
+        <p><strong>回合：</strong> 第 {{ round }} 回合</p>
+
+        {% if wins %}
+            <p><strong>答對統計：</strong>
+                {% for name, count in wins.items() %}
+                    {{ name }}：{{ count }} 次
+                {% endfor %}
+            </p>
+        {% endif %}
+
 
         <form method="post">
             <label>猜測：</label>
@@ -45,11 +55,15 @@
             <p class="result">結果：{{ message }}</p>
         {% endif %}
 
-        {% if message and '恭喜' in message %}
+        {% if message and '恭喜' in message and session.nickname == host %}
             <form method="post" action="/new_game">
+                <input type="hidden" name="game_id" value="{{ game_id }}">
+                <input type="hidden" name="nickname" value="{{ session.nickname }}">
+                <input type="hidden" name="difficulty" value="{{ length }}">
                 <button type="submit" class="btn success">再玩一局</button>
             </form>
         {% endif %}
+
 
         <h2>📜 歷史紀錄</h2>
 		<table id="history-table">
