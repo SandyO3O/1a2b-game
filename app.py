@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import random
 import qrcode
 import os
@@ -35,7 +35,8 @@ def new_game():
     games[game_id] = {
         "answer": answer,
         "length": length,
-        "guesses": []
+        "guesses": [],
+        "owner": nickname
     }
 
     # 產生 QR code
@@ -60,24 +61,32 @@ def game(game_id):
     guess = ''
 
     if request.method == 'POST':
-        guess = request.form['guess']
-        name = session.get('nickname', '匿名')  # 取出暱稱
-
-        if len(guess) != length or not guess.isdigit():
-            message = f"請輸入 {length} 位數字"
+        if 'new_round' in request.form:
+            if session.get('nickname') == game.get('owner'):
+                new_length = int(request.form.get('difficulty', game["length"]))
+                game["answer"] = generate_answer(new_length)
+                game["length"] = new_length
+                game["guesses"] = []
+                return redirect(url_for("game", game_id=game_id))
         else:
-            result = check_guess(answer, guess)
-            message = result
-            guesses.append({
-                "name": name,
-                "guess": guess,
-                "result": result
-            })
-            if result == f"{length}A0B":
-                message += " 🎉 恭喜答對！"
+            guess = request.form['guess']
+            name = session.get('nickname', '匿名')  # 取出暱稱
+
+            if len(guess) != length or not guess.isdigit():
+                message = f"請輸入 {length} 位數字"
+            else:
+                result = check_guess(answer, guess)
+                message = result
+                guesses.append({
+                    "name": name,
+                    "guess": guess,
+                    "result": result
+                })
+                if result == f"{length}A0B":
+                    message += " 🎉 恭喜答對！"
 
     return render_template('game.html', game_id=game_id, guess=guess, message=message,
-                           guesses=guesses, length=length)
+                           guesses=guesses, length=game['length'])
 
 @app.route('/qr/<game_id>')
 def qr_page(game_id):
@@ -104,8 +113,6 @@ def enter_nickname(game_id):
         return redirect(url_for('game', game_id=game_id))
     return render_template('enter_nickname.html', game_id=game_id)
 
-from flask import jsonify
-
 @app.route('/history/<game_id>')
 def history(game_id):
     game = games.get(game_id)
@@ -113,7 +120,7 @@ def history(game_id):
         return jsonify({'error': '遊戲不存在'}), 404
 
     return jsonify({'guesses': game['guesses']})
-    
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))  # Render 會自動指定 PORT
