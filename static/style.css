@@ -70,3 +70,9 @@ th, td {
   font-weight: bold;
   border-radius: 8px;
 }
+
+.global-message {
+    font-size: 1.2em;
+    color: darkgreen;
+    font-weight: bold;
+}

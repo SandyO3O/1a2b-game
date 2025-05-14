@@ -47,7 +47,8 @@ def new_game():
             "guesses": [],
             "round": 1,
             "wins": 0,
-            "host": nickname
+            "host": nickname,
+            "last_message": ""
         }
 
     join_url = request.url_root + 'enter_nickname/' + game_id
@@ -86,7 +87,9 @@ def game(game_id):
             })
             if result == f"{length}A0B":
                 message += f" 🎉 恭喜 {name} 答對！"
+                message += " " + win_msg
                 game["wins"] += 1
+                game["last_message"] = win_msg
 
     return render_template('game.html',
         game_id=game_id,
@@ -96,7 +99,8 @@ def game(game_id):
         length=length,
         round=game.get("round", 1),
         wins=game.get("wins", 0),
-        is_host=(session.get('nickname') == game.get('host'))
+        is_host=(session.get('nickname') == game.get('host')),
+        last_message=game.get("last_message", "")
     )
 
 @app.route('/qr/<game_id>')

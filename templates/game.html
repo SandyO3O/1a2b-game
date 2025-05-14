@@ -57,7 +57,11 @@
         {% elif message and '恭喜' in message and not is_host %}
             <p>✅ 等待房主開始新一局遊戲</p>
         {% endif %}
-
+        
+		{% if last_message %}
+            <p class="global-message">{{ last_message }}</p>
+        {% endif %}
+		
         <h2>📜 歷史紀錄</h2>
         <table id="history-table">
             <tr>
