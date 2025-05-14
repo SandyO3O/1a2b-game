@@ -86,7 +86,7 @@ def game(game_id):
                 "result": result
             })
             if result == f"{length}A0B":
-                message += f" 🎉 恭喜 {name} 答對！"
+                win_msg = f"🎉 {name} 答對了！"
                 message += " " + win_msg
                 game["wins"] += 1
                 game["last_message"] = win_msg
