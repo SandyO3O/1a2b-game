@@ -85,7 +85,7 @@ def game(game_id):
                 "result": result
             })
             if result == f"{length}A0B":
-                message += " 🎉 恭喜答對！"
+                message += f" 🎉 恭喜 {name} 答對！"
                 game["wins"] += 1
 
     return render_template('game.html',
