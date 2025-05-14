@@ -11,7 +11,6 @@
             .then(response => response.json())
             .then(data => {
                 const table = document.getElementById("history-table");
-                // 先清除舊資料（除了表頭）
                 table.innerHTML = `
                     <tr>
                         <th>暱稱</th>
@@ -19,31 +18,25 @@
                         <th>結果</th>
                     </tr>
                 `;
-                // 加入新資料
                 data.guesses.forEach(g => {
                     const row = table.insertRow();
                     row.innerHTML = `<td>${g.name}</td><td>${g.guess}</td><td>${g.result}</td>`;
                 });
+
+                // 更新統計資料
+                document.getElementById("round-count").textContent = data.round;
+                document.getElementById("win-count").textContent = data.wins;
             });
     }
 
-    // 每 2 秒更新一次
     setInterval(fetchHistory, 2000);
 </script>
 <body>
     <div class="container">
         <h1>🎯 猜 {{ length }} 位數字（可重複）</h1>
         <p><strong>遊戲代碼：</strong> {{ game_id }}</p>
-        <p><strong>回合：</strong> 第 {{ round }} 回合</p>
-
-        {% if wins %}
-            <p><strong>答對統計：</strong>
-                {% for name, count in wins.items() %}
-                    {{ name }}：{{ count }} 次
-                {% endfor %}
-            </p>
-        {% endif %}
-
+        <p>🌀 回合數：<span id="round-count">{{ round }}</span></p>
+        <p>🏆 總猜中次數：<span id="win-count">{{ wins }}</span></p>
 
         <form method="post">
             <label>猜測：</label>
@@ -55,30 +48,30 @@
             <p class="result">結果：{{ message }}</p>
         {% endif %}
 
-        {% if message and '恭喜' in message and session.nickname == host %}
+        {% if message and '恭喜' in message and is_host %}
             <form method="post" action="/new_game">
                 <input type="hidden" name="game_id" value="{{ game_id }}">
-                <input type="hidden" name="nickname" value="{{ session.nickname }}">
                 <input type="hidden" name="difficulty" value="{{ length }}">
                 <button type="submit" class="btn success">再玩一局</button>
             </form>
+        {% elif message and '恭喜' in message and not is_host %}
+            <p>✅ 等待房主開始新一局遊戲</p>
         {% endif %}
 
-
         <h2>📜 歷史紀錄</h2>
-		<table id="history-table">
-                <tr>
-                    <th>暱稱</th>
-                    <th>猜測</th>
-                    <th>結果</th>
-                </tr>
-                {% for g in guesses %}
-                <tr>
-                    <td>{{ g.name }}</td>
-                    <td>{{ g.guess }}</td>
-                    <td>{{ g.result }}</td>
-                </tr>
-                {% endfor %}
+        <table id="history-table">
+            <tr>
+                <th>暱稱</th>
+                <th>猜測</th>
+                <th>結果</th>
+            </tr>
+            {% for g in guesses %}
+            <tr>
+                <td>{{ g.name }}</td>
+                <td>{{ g.guess }}</td>
+                <td>{{ g.result }}</td>
+            </tr>
+            {% endfor %}
         </table>
 
         <p><a href="/">回首頁</a></p>

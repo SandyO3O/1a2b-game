@@ -4,7 +4,7 @@ import qrcode
 import os
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"  # 用於 flash 訊息
+app.secret_key = "your-secret-key"
 
 games = {}
 
@@ -27,34 +27,29 @@ def index():
 def new_game():
     length = int(request.form.get('difficulty', 6))
     nickname = request.form.get('nickname', '匿名').strip() or '匿名'
-    session['nickname'] = nickname  # 暱稱存入 session
+    session['nickname'] = nickname
 
-    game_id = request.form.get('game_id')  # 如果是「再玩一局」，沿用原 game_id
-    if not game_id:
+    game_id = request.form.get('game_id')
+    if game_id and game_id in games:
+        # 房主重新開始遊戲（保留 wins, host, round + 1）
+        game = games[game_id]
+        game["answer"] = generate_answer(length)
+        game["length"] = length
+        game["guesses"] = []
+        game["round"] += 1
+    else:
+        # 建立新遊戲
         game_id = generate_game_id()
+        answer = generate_answer(length)
+        games[game_id] = {
+            "answer": answer,
+            "length": length,
+            "guesses": [],
+            "round": 1,
+            "wins": 0,
+            "host": nickname
+        }
 
-    answer = generate_answer(length)
-
-    games[game_id] = {
-        "answer": answer,
-        "length": length,
-        "guesses": [],
-        "host": nickname,      # ⭐ 紀錄房主
-        "wins": {},            # ⭐ 答對次數統計
-        "round": 1             # ⭐ 初始回合數
-    }
-
-    # 產生 QR code
-    join_url = request.url_root + 'enter_nickname/' + game_id
-    qr = qrcode.make(join_url)
-    filename = f'{game_id}.png'
-    filepath = os.path.join('static', filename)
-    qr.save(filepath)
-
-    return redirect(url_for('qr_page', game_id=game_id))
-
-
-    # 產生 QR code
     join_url = request.url_root + 'enter_nickname/' + game_id
     qr = qrcode.make(join_url)
     filename = f'{game_id}.png'
@@ -74,10 +69,10 @@ def game(game_id):
     guesses = game["guesses"]
     message = ''
     guess = ''
-    nickname = session.get('nickname', '匿名')
 
     if request.method == 'POST':
         guess = request.form['guess']
+        name = session.get('nickname', '匿名')
 
         if len(guess) != length or not guess.isdigit():
             message = f"請輸入 {length} 位數字"
@@ -85,15 +80,13 @@ def game(game_id):
             result = check_guess(answer, guess)
             message = result
             guesses.append({
-                "name": nickname,
+                "name": name,
                 "guess": guess,
                 "result": result
             })
-
             if result == f"{length}A0B":
                 message += " 🎉 恭喜答對！"
-                # 更新答對次數
-                game["wins"][nickname] = game["wins"].get(nickname, 0) + 1
+                game["wins"] += 1
 
     return render_template('game.html',
         game_id=game_id,
@@ -101,9 +94,9 @@ def game(game_id):
         message=message,
         guesses=guesses,
         length=length,
-        host=game.get("host"),
-        wins=game.get("wins", {}),
-        round=game.get("round", 1)
+        round=game.get("round", 1),
+        wins=game.get("wins", 0),
+        is_host=(session.get('nickname') == game.get('host'))
     )
 
 @app.route('/qr/<game_id>')
@@ -115,7 +108,7 @@ def qr_page(game_id):
 def join_game_by_code():
     game_code = request.form.get("game_code", "").strip()
     nickname = request.form.get("nickname", '匿名').strip() or '匿名'
-    session['nickname'] = nickname  # 儲存暱稱
+    session['nickname'] = nickname
 
     if game_code in games:
         return redirect(url_for("game", game_id=game_code))
@@ -137,9 +130,12 @@ def history(game_id):
     if not game:
         return jsonify({'error': '遊戲不存在'}), 404
 
-    return jsonify({'guesses': game['guesses']})
+    return jsonify({
+        'guesses': game['guesses'],
+        'round': game['round'],
+        'wins': game['wins']
+    })
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Render 會自動指定 PORT
-    app.run(host="0.0.0.0", port=port)        # 一定要綁定 0.0.0.0 才能對外開放
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
