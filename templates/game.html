@@ -11,23 +11,28 @@
             .then(response => response.json())
             .then(data => {
                 const table = document.getElementById("history-table");
+                const lastMessageDiv = document.getElementById("global-message");
+
+                // 更新歷史紀錄表格
                 table.innerHTML = `
                     <tr>
                         <th>暱稱</th>
                         <th>猜測</th>
                         <th>結果</th>
                     </tr>
-                `;
+            `    ;
                 data.guesses.forEach(g => {
                     const row = table.insertRow();
                     row.innerHTML = `<td>${g.name}</td><td>${g.guess}</td><td>${g.result}</td>`;
                 });
 
-                // 更新統計資料
-                document.getElementById("round-count").textContent = data.round;
-                document.getElementById("win-count").textContent = data.wins;
+                // 顯示全體訊息
+                if (data.last_message) {
+                    lastMessageDiv.innerText = data.last_message;
+                }
             });
     }
+
 
     setInterval(fetchHistory, 2000);
 </script>
@@ -62,6 +67,8 @@
             <p class="global-message">{{ last_message }}</p>
         {% endif %}
 		
+		<div id="global-message" class="result" style="font-weight:bold; color:green; margin: 10px 0;"></div>
+
         <h2>📜 歷史紀錄</h2>
         <table id="history-table">
             <tr>

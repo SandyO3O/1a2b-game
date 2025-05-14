@@ -137,7 +137,8 @@ def history(game_id):
     return jsonify({
         'guesses': game['guesses'],
         'round': game['round'],
-        'wins': game['wins']
+        'wins': game['wins'],
+        'last_message': game.get("last_message", "")
     })
 
 if __name__ == "__main__":
