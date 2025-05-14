@@ -31,14 +31,13 @@ def new_game():
 
     game_id = request.form.get('game_id')
     if game_id and game_id in games:
-        # 房主重新開始遊戲（保留 wins, host, round + 1）
         game = games[game_id]
         game["answer"] = generate_answer(length)
         game["length"] = length
         game["guesses"] = []
         game["round"] += 1
+        game["last_message"] = ""  # 清空上回勝利訊息
     else:
-        # 建立新遊戲
         game_id = generate_game_id()
         answer = generate_answer(length)
         games[game_id] = {

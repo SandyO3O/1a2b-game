@@ -12,6 +12,8 @@
             .then(data => {
                 const table = document.getElementById("history-table");
                 const lastMessageDiv = document.getElementById("global-message");
+                const winCount = document.getElementById("win-count");
+                const roundCount = document.getElementById("round-count");
 
                 // 更新歷史紀錄表格
                 table.innerHTML = `
@@ -20,7 +22,7 @@
                         <th>猜測</th>
                         <th>結果</th>
                     </tr>
-            `    ;
+                `;
                 data.guesses.forEach(g => {
                     const row = table.insertRow();
                     row.innerHTML = `<td>${g.name}</td><td>${g.guess}</td><td>${g.result}</td>`;
@@ -30,9 +32,14 @@
                 if (data.last_message) {
                     lastMessageDiv.innerText = data.last_message;
                 }
+
+                // 更新回合與勝利次數
+                if (winCount && roundCount) {
+                    winCount.innerText = data.wins;
+                    roundCount.innerText = data.round;
+                }
             });
     }
-
 
     setInterval(fetchHistory, 2000);
 </script>
@@ -53,21 +60,17 @@
             <p class="result">結果：{{ message }}</p>
         {% endif %}
 
-        {% if message and '恭喜' in message and is_host %}
+        {% if is_host and last_message %}
             <form method="post" action="/new_game">
                 <input type="hidden" name="game_id" value="{{ game_id }}">
                 <input type="hidden" name="difficulty" value="{{ length }}">
                 <button type="submit" class="btn success">再玩一局</button>
             </form>
-        {% elif message and '恭喜' in message and not is_host %}
+        {% elif last_message and not is_host %}
             <p>✅ 等待房主開始新一局遊戲</p>
         {% endif %}
-        
-		{% if last_message %}
-            <p class="global-message">{{ last_message }}</p>
-        {% endif %}
-		
-		<div id="global-message" class="result" style="font-weight:bold; color:green; margin: 10px 0;"></div>
+
+        <div id="global-message" class="result" style="font-weight:bold; color:green; margin: 10px 0;"></div>
 
         <h2>📜 歷史紀錄</h2>
         <table id="history-table">
