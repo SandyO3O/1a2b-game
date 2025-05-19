@@ -32,6 +32,7 @@ def new_game():
     game_id = request.form.get('game_id')
     if game_id and game_id in games:
         game = games[game_id]
+        session['nickname'] = game['host']
         game["answer"] = generate_answer(length)
         game["length"] = length
         game["guesses"] = []
